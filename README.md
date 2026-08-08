@@ -101,7 +101,7 @@ All 7 errors are false negatives — poisonous mushrooms predicted as edible, wh
 - All features are categorical codes, which simplifies real biological variation; some categories are sparsely represented (e.g. `waste` habitat has 192 samples, all edible — not a safety rule).
 - Two highly predictive features were removed by design, so performance here is not comparable to published results on the full feature set.
 - Only one model family is evaluated at this stage.
-- **This is coursework. It must not be used as a real-world mushroom safety tool.**
+
 
 ---
 
