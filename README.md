@@ -1,94 +1,122 @@
-# CSE382 Mushroom Edibility Classification
+# Mushroom Edibility Classification
 
-This repository contains the **Role 1: Data and Preprocessing** work for the first deliverable of the CSE382 Introduction to Machine Learning project.
+A supervised machine learning project that predicts whether a mushroom is **edible** or **poisonous** based on its physical characteristics.
 
-The project uses the [UCI Mushroom Dataset](https://archive.ics.uci.edu/dataset/73/mushroom) to prepare a supervised binary-classification study that distinguishes between **edible** and **poisonous** mushrooms.
+This repository contains the first project deliverable, including data acquisition, preprocessing, exploratory data analysis, baseline classification, performance evaluation, error analysis, and the complete project report.
 
-## Notebook
+> **Important:** This project is intended for educational purposes only. It must not be used to determine whether real mushrooms are safe for consumption.
 
-[`Machine_Learning_Project.ipynb`](Machine_Learning_Project.ipynb) covers:
+---
 
-- Automatic dataset acquisition from the UCI repository
-- Dataset schema and integrity validation
-- Stratified 80/20 train-test splitting
-- Detection and treatment of hidden `?` values
-- Training-only feature analysis
-- Removal of shortcut and zero-variance features
-- Feature-reduction sensitivity analysis
-- Class-balance assessment
-- One-hot encoding preparation
+## Project Objective
 
-[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/nadineradwanaliradwan/ML_Project_S26/blob/main/Machine_Learning_Project.ipynb)
+The objective of this project is to develop a binary classification solution that predicts mushroom edibility using physical characteristics such as:
+
+- Cap shape and color
+- Gill size and color
+- Stalk properties
+- Ring type
+- Population
+- Habitat
+- Bruising status
+
+The target variable contains two classes:
+
+- `e`: Edible
+- `p`: Poisonous
+
+Because the target contains two possible outcomes, this is a **supervised binary classification problem**.
+
+---
 
 ## Dataset
 
-- **Source:** UCI Machine Learning Repository
-- **Instances:** 8,124
-- **Input attributes:** 22 categorical attributes
-- **Target:** `class`
-  - `e`: edible
-  - `p`: poisonous
-- **Missing-value marker:** `?` in `stalk-root`
+The project uses the **Mushroom Dataset** from the UCI Machine Learning Repository.
 
-The notebook downloads the dataset automatically. If downloading is unavailable in Google Colab, it provides a manual upload fallback.
+- **Source:** [UCI Mushroom Dataset](https://archive.ics.uci.edu/dataset/73/mushroom)
+- **Dataset ID:** 73
+- **Number of samples:** 8,124
+- **Original input features:** 22
+- **Feature type:** Categorical
+- **Target variable:** Mushroom edibility
+- **Target classes:** Edible and Poisonous
 
-## Preprocessing Workflow
+The dataset was loaded directly into the notebook using the `ucimlrepo` Python package. No manually modified or external version of the dataset was used.
 
-1. Load the raw headerless dataset and assign the published column names.
-2. Verify the number of rows, columns, classes, and missing-value markers.
-3. Encode poisonous mushrooms as the positive class (`1`).
-4. Create a stratified 80/20 train-test split before data-dependent analysis.
-5. Replace unknown `stalk-root` values with an explicit `unknown` category.
-6. Evaluate individual features using cross-validated accuracy and mutual information on the training set only.
-7. Remove the three strongest shortcut features:
-   - `odor`
-   - `spore-print-color`
-   - `gill-color`
-8. Remove `veil-type` because it has zero variance.
-9. Retain 18 attributes for later modeling.
-10. Prepare nominal categorical attributes using one-hot encoding.
+---
 
-## Requirements
+## Repository Contents
 
-The notebook uses:
+| File | Description |
+|---|---|
+| `ML_summer_26.ipynb` | Complete Google Colab notebook containing data loading, preprocessing, EDA, model training, and evaluation |
+| `ML Project.pdf` | Full written project report, including methodology, findings, error analysis, contributions, and references |
+| `README.md` | Summary of the project workflow and results |
 
-- Python 3
-- NumPy
-- pandas
-- Matplotlib
-- Seaborn
-- scikit-learn
+---
 
-Google Colab already provides these packages.
+## Dataset Inspection
 
-## How to Run
+The initial data inspection produced the following findings:
 
-### Google Colab
+| Data-quality check | Result |
+|---|---:|
+| Total samples | 8,124 |
+| Original features | 22 |
+| Duplicate rows | 0 |
+| Features containing missing values | 1 |
+| Missing values in `stalk-root` | 2,480 |
 
-1. Open the notebook using the **Open in Colab** button above.
-2. Select **Runtime → Restart session and run all**.
-3. Wait for all cells to finish.
-4. Confirm that no errors appear.
+The `stalk-root` feature was the only feature containing missing values. Removing every incomplete row would have deleted a considerable portion of the dataset, so missing-value imputation was used instead.
 
-### Local Jupyter Environment
+---
 
-```bash
-git clone https://github.com/nadineradwanaliradwan/ML_Project_S26.git
-cd ML_Project_S26
-jupyter notebook Machine_Learning_Project.ipynb
-```
+## Target Distribution
 
-Then run all cells from top to bottom.
+The target classes were approximately balanced:
 
-## Reproducibility
+| Class | Samples | Percentage |
+|---|---:|---:|
+| Edible | 4,208 | 51.8% |
+| Poisonous | 3,916 | 48.2% |
 
-- Random seed: `42`
-- Test size: `20%`
-- Cross-validation: five-fold stratified cross-validation
-- Feature-reduction decisions use training data only
-- The notebook has been executed sequentially without errors or warnings
+The difference between the classes was only 292 samples. Therefore, oversampling, undersampling, and synthetic balancing techniques were not required.
 
-## Scope
+Stratified sampling was still used to preserve the same class distribution in the training and testing sets.
 
-This notebook contains the **Data and Preprocessing Lead** contribution only. Exploratory data analysis, final model comparison, and error analysis are handled in the other project deliverables.
+---
 
+## Data Preprocessing
+
+### 1. Feature Reduction
+
+Two highly predictive features were intentionally removed:
+
+- `odor`
+- `spore-print-color`
+
+These features are strongly associated with mushroom edibility and could make the classification problem overly simple.
+
+Removing them required the classifier to learn from combinations of the remaining mushroom characteristics instead of depending on a small number of obvious predictors.
+
+After feature reduction, the dataset contained **20 original categorical input features**.
+
+### 2. Train-Test Split
+
+The dataset was divided using an 80/20 stratified split:
+
+| Dataset portion | Samples | Percentage |
+|---|---:|---:|
+| Training set | 6,499 | 80% |
+| Testing set | 1,625 | 20% |
+
+The split used:
+
+```python
+train_test_split(
+    X,
+    y,
+    test_size=0.2,
+    random_state=42,
+    stratify=y
+)
